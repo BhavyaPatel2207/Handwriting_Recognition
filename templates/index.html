@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>20CE079 ML Project</title>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='charusat.jpg') }}">
+    <h1>Handwriting Recognition System</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data" id="image-upload-form">
+        <input type="file" accept="image/*" id="image-upload-input" name="image" required onchange="previewImage()">
+        <br>
+        <br>
+        <img id="image-preview" src="" alt="Image Preview" height="300" width="300" style="max-width: 800px; max-height: 800px; display: none;">
+        <br>
+        <button type="submit">Submit</button>
+        <button type="button" id="clear-button">Clear</button>
+    </form>
+
+    <div id="prediction-result" style="display: none;">
+        <h2>Prediction Result</h2>
+        <p id="result-text"></p>
+        <h5>Created by:-</h5>
+        <h5>Roll No: 20CE079</h5>
+        <h5>Name: Bhavya Patel</h5>
+        <h5>Subject: CE476-Machine Learning</h5>
+    </div>
+
+    <script>
+        function previewImage() {
+            const input = document.getElementById("image-upload-input");
+            const preview = document.getElementById("image-preview");
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearForm() {
+            document.getElementById("image-upload-form").reset();
+            document.getElementById("image-preview").style.display = "none";
+            document.getElementById("prediction-result").style.display = "none";
+        }
+
+        // Display the prediction result when the form is submitted.
+        const form = document.getElementById("image-upload-form");
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const resultDiv = document.getElementById("prediction-result");
+            const resultText = document.getElementById("result-text");
+
+            // Make an AJAX request to your server to get the prediction result
+            fetch("/predict", {
+                method: "POST",
+                body: new FormData(form),
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultText.textContent = data.prediction;
+                resultDiv.style.display = "block";
+            })
+            .catch(error => {
+                console.error("Error fetching prediction: ", error);
+            });
+        });
+
+        document.getElementById("clear-button").addEventListener("click", clearForm);
+
+
+        previewImage();
+    </script>
+</body>
+</html>
